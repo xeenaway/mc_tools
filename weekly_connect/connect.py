@@ -1,45 +1,35 @@
 # -*- coding: UTF-8 -*-
-"""
-Module generate weekly connection statistic
-"""
+"""Module generate weekly connection statistic"""
 
+import csv
 import psycopg2
 
 
 def get_files():
-    """
-    Reading stat files
-    """
+    """Reading stat files"""
 
     atms = []
 
-    with open("event.csv") as csv_file:
-        csv_file.readline()
-
-        for line in csv_file:
-            atm = line.strip().split("|")
-            atms.append([atm[1], atm[2], int(atm[11])])
+    with open("event.csv", "r", newline="") as csv_file:
+        reader = csv.DictReader(csv_file, delimiter="|")
+        for row in reader:
+            atms.append([row["ID"], row["agent_offline"], int(row["offline"])])
 
     atms.sort(key=lambda i: i[2], reverse=True)
     atms = atms[:7]
 
     with open("day.csv") as csv_file:
-        csv_file.readline()
-
-        for line in csv_file:
-            atm = line.strip().split("|")
-
-            for row in atms:
-                if atm[1] == row[0]:
-                    atms[atms.index(row)].append(atm[18])
+        reader = csv.DictReader(csv_file, delimiter="|")
+        for row in reader:
+            for atm in atms:
+                if row["ID"] == atm[0]:
+                    atms[atms.index(atm)].append(row["host"])
 
     return atms
 
 
 def get_addresses(atms):
-    """
-    Obtain addresses from DB
-    """
+    """Obtain addresses from DB"""
 
     connect = psycopg2.connect(
         database="mc",
@@ -65,22 +55,17 @@ def get_addresses(atms):
 
 
 def write_file(atms):
-    """
-    Write result into file
-    """
+    """Write result into file"""
 
     with open("result.csv", "w") as result_file:
-
         for atm in atms:
             line = atm[0] + "|" + atm[1] + "|" + atm[2] + "|" + str(atm[3]) + \
-                        "|" + atm[4] + "\n"
+                "|" + atm[4] + "\n"
             result_file.write(line)
 
 
 def main():
-    """
-    Main function
-    """
+    """Main function"""
 
     atms = get_files()
 
@@ -93,7 +78,7 @@ def main():
         print("Addresses obtained")
 
     write_file(atms)
-    print("All done. result.csv generated")
+    print("All done. \"result.csv\" generated")
 
 
 if __name__ == "__main__":
