@@ -1,0 +1,1 @@
+python db.py index %1 -l ht2

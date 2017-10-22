@@ -1,0 +1,13 @@
+# IntelliJ project files
+.idea
+*.iml
+out
+gen
+.gitignore
+.idea/
+
+# log files
+*.csv
+*.trc
+
+
